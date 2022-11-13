@@ -1,5 +1,6 @@
 package com.example.monitoring.showProduct.service;
 
+import com.example.monitoring.common.exception.NoSearchElementException;
 import com.example.monitoring.showProduct.dto.ShowProductRequest;
 import com.example.monitoring.showProduct.repository.ShowProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,14 @@ public class ShowProductService {
 
     public Long countShowProduct(ShowProductRequest request) {
         log.info("request = " + request.getProductId());
+        long count = getCount(request);
+        if (count == 0) {
+            throw new NoSearchElementException();
+        }
+        return count;
+    }
+
+    private long getCount(ShowProductRequest request) {
         if (request.getProductId() == null) {
             return Long.valueOf(
                     showProductRepository
@@ -22,7 +31,6 @@ public class ShowProductService {
                             .size()
             );
         }
-
         return Long.valueOf(
                 showProductRepository
                         .findByShowTimeBetweenAndProduct(request.getStartTime(), request.getEndTime(),
