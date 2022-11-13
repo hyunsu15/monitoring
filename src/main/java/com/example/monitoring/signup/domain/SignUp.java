@@ -14,15 +14,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "sign_up")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-
 public class SignUp {
     @Id
     private ObjectId id;
     @CreatedDate
+    @Indexed(name = "deleteAt", expireAfter = "7d")
     private LocalDateTime createdAt;
-    @Indexed(expireAfterSeconds = 60 * 60 * 24 * 7)
-    private LocalDateTime expiredAt;
-
     private boolean success;
     private String name;
     private LocalDateTime signUpTime;

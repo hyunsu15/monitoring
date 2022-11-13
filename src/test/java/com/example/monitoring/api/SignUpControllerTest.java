@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import com.example.monitoring.signup.domain.SignUp;
 import com.example.monitoring.signup.repository.SignUpRepository;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,11 @@ class SignUpControllerTest {
 
     @Autowired
     SignUpRepository signUpRepository;
+
+    @AfterEach
+    void shutDown() {
+        signUpRepository.deleteAll();
+    }
 
     @Test
     void emptySignTest() throws Exception {
@@ -49,8 +55,29 @@ class SignUpControllerTest {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
     }
 
-    @AfterEach
-    void shutDown() {
-        signUpRepository.deleteAll();
+    @Test
+    void searchByNameTest() throws Exception {
+        signUpRepository.save(SignUp.builder().name("qwe").signUpTime(LocalDateTime.now()).build());
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        get("/signup/search?name=qwe")
+                )
+                .andReturn()
+                .getResponse();
+        assertThat(response.getContentAsString()).contains("qwe");
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+    }
+
+    @Test
+    void searchByNameErrorTest() throws Exception {
+        signUpRepository.save(SignUp.builder().name("q").signUpTime(LocalDateTime.now()).build());
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        get("/signup/search?name=qwe")
+                )
+                .andReturn()
+                .getResponse();
+        assertThat(response.getContentAsString(StandardCharsets.UTF_8)).contains("검색 결과가 없습니다.");
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
 }

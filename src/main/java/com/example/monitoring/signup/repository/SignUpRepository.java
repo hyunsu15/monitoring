@@ -9,5 +9,8 @@ import org.springframework.data.mongodb.repository.Query;
 
 public interface SignUpRepository extends MongoRepository<SignUp, ObjectId> {
     @Query(value = "{ 'signUpTime' : {$gte : ?0, $lte: ?1 }}")
-    List<SignUp> countBySignUpTimeBetween(LocalDateTime startTime, LocalDateTime endTime);
+    List<SignUp> findBySignUpTimeBetween(LocalDateTime startTime, LocalDateTime endTime);
+
+    @Query(value = "{ 'signUpTime' : {$gte : ?0, $lte: ?1 }, 'name' : ?2 }")
+    List<SignUp> findBySignUpTimeBetweenAndName(LocalDateTime startTime, LocalDateTime endTime, String name);
 }

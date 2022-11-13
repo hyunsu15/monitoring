@@ -9,4 +9,8 @@ import lombok.Setter;
 public class SignUpRequest extends BaseRequest {
     private boolean success;
     private String name;
+
+    public boolean isNameNull() {
+        return name == null && name.trim().isEmpty();
+    }
 }

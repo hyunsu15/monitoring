@@ -16,11 +16,16 @@ class SignUpRepositoryTest {
     @Autowired
     SignUpRepository signUpRepository;
 
+    @AfterEach
+    public void shutdown() {
+        signUpRepository.deleteAll();
+    }
+
     @Test
     void emptyTest() {
         LocalDateTime startTime = LocalDateTime.now();
         LocalDateTime endTime = startTime.plus(1, ChronoUnit.DAYS);
-        long except = signUpRepository.countBySignUpTimeBetween(startTime, endTime).size();
+        long except = signUpRepository.findBySignUpTimeBetween(startTime, endTime).size();
         int result = 0;
         assertThat(except).isEqualTo(result);
     }
@@ -32,7 +37,7 @@ class SignUpRepositoryTest {
         LocalDateTime signTime = startTime.plus(1, ChronoUnit.MINUTES);
 
         signUpRepository.save(SignUp.builder().signUpTime(signTime).build());
-        long except = signUpRepository.countBySignUpTimeBetween(startTime, endTime).size();
+        long except = signUpRepository.findBySignUpTimeBetween(startTime, endTime).size();
         int result = 1;
         assertThat(except).isEqualTo(result);
     }
@@ -45,7 +50,7 @@ class SignUpRepositoryTest {
         LocalDateTime signTime = startTime.plus(1, ChronoUnit.DAYS);
 
         signUpRepository.save(SignUp.builder().signUpTime(signTime).build());
-        long except = signUpRepository.countBySignUpTimeBetween(startTime, endTime).size();
+        long except = signUpRepository.findBySignUpTimeBetween(startTime, endTime).size();
         int result = 1;
         assertThat(except).isEqualTo(result);
     }
@@ -58,13 +63,36 @@ class SignUpRepositoryTest {
         LocalDateTime signTime = startTime;
 
         signUpRepository.save(SignUp.builder().signUpTime(signTime).build());
-        long except = signUpRepository.countBySignUpTimeBetween(startTime, endTime).size();
+        long except = signUpRepository.findBySignUpTimeBetween(startTime, endTime).size();
         int result = 1;
         assertThat(except).isEqualTo(result);
     }
 
-    @AfterEach
-    void shutdown() {
-        signUpRepository.deleteAll();
+    @DisplayName("이름 찾기 체크")
+    @Test
+    void nameSearchTest() {
+        LocalDateTime startTime = LocalDateTime.now();
+        LocalDateTime endTime = startTime.plus(1, ChronoUnit.DAYS);
+        LocalDateTime signTime = startTime;
+        String name = "qwe";
+        signUpRepository.save(SignUp.builder().name(name).signUpTime(signTime).build());
+        long except = signUpRepository.findBySignUpTimeBetweenAndName(startTime, endTime, name).size();
+        int result = 1;
+        assertThat(except).isEqualTo(result);
+    }
+
+    @DisplayName("이름 찾기 없는 케이스 체크")
+    @Test
+    void nameSearchSizeZeroTest() {
+        LocalDateTime startTime = LocalDateTime.now();
+        LocalDateTime endTime = startTime.plus(1, ChronoUnit.DAYS);
+        LocalDateTime signTime = startTime;
+        String name = "qwe";
+        signUpRepository.save(SignUp.builder().name(name).signUpTime(signTime).build());
+        long except = signUpRepository.findBySignUpTimeBetweenAndName(startTime, endTime, "q").size();
+        int result = 0;
+        System.out.println("result = " + result);
+        System.out.println("except = " + except);
+        assertThat(except).isEqualTo(result);
     }
 }

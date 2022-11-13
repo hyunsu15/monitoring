@@ -10,14 +10,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    //TODO : 나중에 로그 지우기
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<ErrorResponse> exceptedError(BaseException baseException) {
+        log.info("잡힌 에러: {}", baseException.toResponse().getMessage());
         return ResponseEntity.badRequest().body(baseException.toResponse());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> error(Exception exception) {
-        return ResponseEntity.badRequest().body(new ErrorResponse("예상치 못한 에러입니다."));
+        log.info("error: {}", exception.getCause());
+        log.info("error: {}", exception);
+
+        return ResponseEntity.internalServerError().body(new ErrorResponse("예상치 못한 에러입니다."));
     }
 
 }

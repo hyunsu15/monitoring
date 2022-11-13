@@ -17,10 +17,17 @@ public enum Date {
 
     public static LocalDateTime toLocalDate(LocalDateTime now, String date) {
         try {
+            validate(date);
             long minutes = parseDate(date);
             return now.minus(minutes, ChronoUnit.MINUTES);
         } catch (NullPointerException | NumberFormatException e) {
             throw new DateParseException();
+        }
+    }
+
+    private static void validate(String date) {
+        if (date == null || date.trim().isEmpty()) {
+            throw new NumberFormatException();
         }
     }
 

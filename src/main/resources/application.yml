@@ -4,3 +4,4 @@ spring:
       host: localhost
       port: 27017
       database: monitoring
+      auto-index-creation: true
