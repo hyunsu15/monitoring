@@ -32,4 +32,14 @@ public class SignUpService {
                 .map(x -> SearchResponse.makeSearchResponse(x))
                 .collect(Collectors.toList());
     }
+
+    public void addSignUpRecord(SignUpRequest request) {
+        signUpRepository.save(
+                SignUp.builder()
+                        .name(request.getName())
+                        .success(request.isSuccess())
+                        .signUpTime(request.getSignUpTime())
+                        .build()
+        );
+    }
 }
