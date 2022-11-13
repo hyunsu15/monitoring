@@ -17,9 +17,13 @@ public class SignUpService {
     private final SignUpRepository signUpRepository;
 
     public Long getCount(@NotNull SignUpRequest request) {
-        return (long) signUpRepository
+        long count = signUpRepository
                 .findBySignUpTimeBetween(request.getStartTime(), request.getEndTime())
                 .size();
+        if (count == 0) {
+            throw new NoSearchElementException();
+        }
+        return count;
     }
 
     public List<SearchResponse> searchByName(SignUpRequest request) {
