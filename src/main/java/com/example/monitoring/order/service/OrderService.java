@@ -1,7 +1,9 @@
 package com.example.monitoring.order.service;
 
+import com.example.monitoring.common.util.grade.Grade;
 import com.example.monitoring.common.util.grade.GradeRouter;
 import com.example.monitoring.order.domain.Order;
+import com.example.monitoring.order.dto.MustGradeRequest;
 import com.example.monitoring.order.dto.OrderRequest;
 import com.example.monitoring.order.repository.OrderRepository;
 import java.util.List;
@@ -37,31 +39,31 @@ public class OrderService {
         return Long.valueOf(returnElse.get().size());
     }
 
-//    private long getCount(
-//            MustGradeRequest request
-//            , Supplier<List<AddCart>> returnIfnull
-//            , Supplier<List<AddCart>> returnElse) {
-//        if (request.getProductId() == null) {
-//            return Long.valueOf(returnIfnull.get().size());
-//        }
-//        return Long.valueOf(returnElse.get().size());
-//    }
+    private long getCount(
+            MustGradeRequest request
+            , Supplier<List<Order>> returnIfnull
+            , Supplier<List<Order>> returnElse) {
+        if (request.getProductId() == null) {
+            return Long.valueOf(returnIfnull.get().size());
+        }
+        return Long.valueOf(returnElse.get().size());
+    }
 
-//    public Long countGradeEquals(MustGradeRequest request) {
-//        Grade grade = gradeRouter.findByGradeElseThrow(request.getGrade());
-//        long count = getCount(
-//                request
-//                , () -> addCartRepository.findByAddTimeBetweenAndGrade(
-//                        request.getStartTime()
-//                        , request.getEndTime()
-//                        , grade.getGrade())
-//                , () -> addCartRepository.findByAddTimeBetweenAndProductIdAndGrade(
-//                        request.getStartTime()
-//                        , request.getEndTime()
-//                        , request.getProductId()
-//                        , grade.getGrade()));
-//        return count;
-//    }
+    public Long countGradeEquals(MustGradeRequest request) {
+        Grade grade = gradeRouter.findByGradeElseThrow(request.getGrade());
+        long count = getCount(
+                request
+                , () -> orderRepository.findByOrderTimeBetweenAndGrade(
+                        request.getStartTime()
+                        , request.getEndTime()
+                        , grade.getGrade())
+                , () -> orderRepository.findByOrderTimeBetweenAndProductIdAndGrade(
+                        request.getStartTime()
+                        , request.getEndTime()
+                        , request.getProductId()
+                        , grade.getGrade()));
+        return count;
+    }
 //
 //    public Long countGradeMoreThan(MustGradeRequest request) {
 //        List<Grade> grades = gradeRouter.findByGradeListElseThrow(request.getGrade());

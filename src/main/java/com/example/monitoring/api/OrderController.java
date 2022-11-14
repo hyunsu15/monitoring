@@ -3,6 +3,8 @@ package com.example.monitoring.api;
 import static com.example.monitoring.common.util.Validator.checkError;
 
 import com.example.monitoring.common.exception.IllegalDateException;
+import com.example.monitoring.common.exception.NoMisMatchGradeException;
+import com.example.monitoring.order.dto.MustGradeRequest;
 import com.example.monitoring.order.dto.OrderRequest;
 import com.example.monitoring.order.service.OrderService;
 import javax.validation.Valid;
@@ -28,11 +30,11 @@ public class OrderController {
         return ResponseEntity.ok().body(orderService.getCountOrder(request));
     }
 
-//    @GetMapping("/count/grade")
-//    public ResponseEntity<Long> countGradeEquals(@Valid MustGradeRequest request, BindingResult result) {
-//        checkError(result, () -> new NoMisMatchGradeException());
-//        return ResponseEntity.ok().body(addCartService.countGradeEquals(request));
-//    }
+    @GetMapping("/count/grade")
+    public ResponseEntity<Long> countGradeEquals(@Valid MustGradeRequest request, BindingResult result) {
+        checkError(result, () -> new NoMisMatchGradeException());
+        return ResponseEntity.ok().body(orderService.countGradeEquals(request));
+    }
 //
 //    @GetMapping("/count/grade/more")
 //    public ResponseEntity<Long> countGradeMoreThan(@Valid MustGradeRequest request, BindingResult result) {
