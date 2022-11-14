@@ -112,5 +112,50 @@ class AddCartControllerTest {
         }
     }
 
+    @Nested
+    class GradeTest {
+        private static final String URL = "/addCart/count/grade";
+        private static final String ERROR_MESSAGE = "grade 파라미터를 다시 확인해주세요.";
+
+        @Test
+        void emptyShowTest() throws Exception {
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL)
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).contains(ERROR_MESSAGE);
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        }
+
+        @Test
+        void zeroMismatchIdTest() throws Exception {
+            repository.save(
+                    AddCart.builder().grade("GOLD").productId("123").addTime(LocalDateTime.now()).build());
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL + "?grade=bronze")
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).isEqualTo("0");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+        @Test
+        void oneMatchIdTest() throws Exception {
+            repository.save(
+                    AddCart.builder().grade("BRONZE").productId("123").addTime(LocalDateTime.now()).build());
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL + "?grade=bronze")
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString()).isEqualTo("1");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+    }
 
 }

@@ -15,4 +15,10 @@ public interface AddCartRepository extends MongoRepository<AddCart, ObjectId> {
     @Query(value = "{ 'addTime' : {$gte : ?0, $lte: ?1 },'productId' : ?2 }")
     List<ShowProduct> findByAddTimeBetweenAndProduct(LocalDateTime startTime, LocalDateTime endTime, String productId);
 
+    @Query(value = "{ 'addTime' : {$gte : ?0, $lte: ?1 },'productId' : ?2,'grade': {$regex : ?3, $options: 'i' }}")
+    List<ShowProduct> findByAddTimeBetweenAndProductIdAndGrade(LocalDateTime startTime, LocalDateTime endTime,
+                                                               String productId, String grade);
+
+    @Query(value = "{ 'addTime' : {$gte : ?0, $lte: ?1 },'grade': {$regex : ?2, $options: 'i'}}")
+    List<ShowProduct> findByAddTimeBetweenAndGrade(LocalDateTime startTime, LocalDateTime endTime, String grade);
 }

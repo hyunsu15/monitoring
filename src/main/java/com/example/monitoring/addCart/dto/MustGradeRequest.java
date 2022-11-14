@@ -1,4 +1,4 @@
-package com.example.monitoring.showProduct.dto;
+package com.example.monitoring.addCart.dto;
 
 import com.example.monitoring.common.dto.BaseRequest;
 import javax.validation.constraints.AssertFalse;
