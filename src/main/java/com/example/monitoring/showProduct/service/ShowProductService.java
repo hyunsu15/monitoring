@@ -1,8 +1,13 @@
 package com.example.monitoring.showProduct.service;
 
 import com.example.monitoring.common.exception.NoSearchElementException;
+import com.example.monitoring.common.util.grade.Grade;
+import com.example.monitoring.common.util.grade.GradeRouter;
+import com.example.monitoring.showProduct.domain.ShowProduct;
 import com.example.monitoring.showProduct.dto.ShowProductRequest;
 import com.example.monitoring.showProduct.repository.ShowProductRepository;
+import java.util.List;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,29 +18,49 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ShowProductService {
     private final ShowProductRepository showProductRepository;
+    private final GradeRouter gradeRouter;
 
     public Long countShowProduct(ShowProductRequest request) {
-        log.info("request = " + request.getProductId());
-        long count = getCount(request);
-        if (count == 0) {
-            throw new NoSearchElementException();
-        }
-        return count;
+        long count = getCount(
+                request
+                , () -> showProductRepository
+                        .findByShowTimeBetween(request.getStartTime(), request.getEndTime())
+                , () -> showProductRepository
+                        .findByShowTimeBetweenAndProduct(request.getStartTime(), request.getEndTime(),
+                                request.getProductId()));
+        return validateThenGet(count);
     }
 
-    private long getCount(ShowProductRequest request) {
+    private long getCount(
+            ShowProductRequest request
+            , Supplier<List<ShowProduct>> returnIfnull
+            , Supplier<List<ShowProduct>> returnElse) {
         if (request.getProductId() == null) {
-            return Long.valueOf(
-                    showProductRepository
-                            .findByShowTimeBetween(request.getStartTime(), request.getEndTime())
-                            .size()
-            );
+            return Long.valueOf(returnIfnull.get().size());
         }
-        return Long.valueOf(
-                showProductRepository
-                        .findByShowTimeBetweenAndProduct(request.getStartTime(), request.getEndTime(),
-                                request.getProductId())
-                        .size()
-        );
+        return Long.valueOf(returnElse.get().size());
+    }
+
+    private Long validateThenGet(long value) {
+        if (value == 0) {
+            throw new NoSearchElementException();
+        }
+        return value;
+    }
+
+    public Long countGradeEquals(ShowProductRequest request) {
+        Grade grade = gradeRouter.findByGradeElseGetBronze(request.getGrade());
+        long count = getCount(
+                request
+                , () -> showProductRepository.findByShowTimeBetweenAndGrade(
+                        request.getStartTime()
+                        , request.getEndTime()
+                        , grade.getGrade())
+                , () -> showProductRepository.findByShowTimeBetweenAndProductIdAndGrade(
+                        request.getStartTime()
+                        , request.getEndTime()
+                        , request.getProductId()
+                        , grade.getGrade()));
+        return validateThenGet(count);
     }
 }

@@ -25,10 +25,13 @@ public class ShowProduct {
     private String productId;
     private LocalDateTime showTime;
 
+    private String grade;
+
     @Builder
-    public ShowProduct(String account, String productId, LocalDateTime showTime) {
+    public ShowProduct(String account, String productId, LocalDateTime showTime, String grade) {
         this.account = account;
         this.productId = productId;
         this.showTime = showTime;
+        this.grade = grade;
     }
 }

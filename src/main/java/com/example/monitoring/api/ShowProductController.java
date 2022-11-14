@@ -24,4 +24,11 @@ public class ShowProductController {
     public ResponseEntity<Long> countShowProduct(@Valid ShowProductRequest request) {
         return ResponseEntity.ok().body(showProductService.countShowProduct(request));
     }
+
+    @GetMapping("/count/grade")
+    public ResponseEntity<Long> countGradeEquals(@Valid ShowProductRequest request) {
+        return ResponseEntity.ok().body(showProductService.countGradeEquals(request));
+    }
+
+
 }

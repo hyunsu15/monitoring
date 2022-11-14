@@ -6,10 +6,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.example.monitoring.showProduct.domain.ShowProduct;
 import com.example.monitoring.showProduct.repository.ShowProductRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -40,66 +42,141 @@ class ShowProductControllerTest {
                 .forEach(CrudRepository::deleteAll);
     }
 
-    @Test
-    void emptyShowTest() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(
-                        get("/product/count")
-                )
-                .andReturn()
-                .getResponse();
-        assertThat(response.getContentAsString()).isEqualTo("0");
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+    @Nested
+    class CountTest {
+        @Test
+        void emptyShowTest() throws Exception {
+            MockHttpServletResponse response = mockMvc.perform(
+                            get("/product/count")
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).contains("검색 결과가 없습니다.");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        }
+
+        @Test
+        void oneShowTest() throws Exception {
+            showProductRepository.save(ShowProduct.builder().showTime(LocalDateTime.now()).build());
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get("/product/count")
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString()).isEqualTo("1");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+        @Test
+        void zeroMismatchIdTest() throws Exception {
+            showProductRepository.save(ShowProduct.builder().productId("123").showTime(LocalDateTime.now()).build());
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get("/product/count?productId=1")
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).contains("검색 결과가 없습니다.");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        }
+
+        @Test
+        void oneMatchIdTest() throws Exception {
+            showProductRepository.save(ShowProduct.builder().productId("123").showTime(LocalDateTime.now()).build());
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get("/product/count?productId=123")
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString()).isEqualTo("1");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+        @Test
+        void allSearchTest() throws Exception {
+            showProductRepository.save(ShowProduct.builder().productId("123").showTime(LocalDateTime.now()).build());
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get("/product/count")
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString()).isEqualTo("1");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
     }
 
-    @Test
-    void oneShowTest() throws Exception {
-        showProductRepository.save(ShowProduct.builder().showTime(LocalDateTime.now()).build());
+    @Nested
+    class GradeTest {
+        private static final String URL = "/product/count/grade";
 
-        MockHttpServletResponse response = mockMvc.perform(
-                        get("/product/count")
-                )
-                .andReturn()
-                .getResponse();
-        assertThat(response.getContentAsString()).isEqualTo("1");
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        @Test
+        void emptyShowTest() throws Exception {
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL)
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).contains("검색 결과가 없습니다.");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        }
+
+        @Test
+        void oneShowTest() throws Exception {
+            showProductRepository.save(ShowProduct.builder().grade("BRONZE").showTime(LocalDateTime.now()).build());
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL)
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString()).isEqualTo("1");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+        @Test
+        void zeroMismatchIdTest() throws Exception {
+            showProductRepository.save(
+                    ShowProduct.builder().grade("GOLD").productId("123").showTime(LocalDateTime.now()).build());
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL + "?grade=bronze")
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).contains("검색 결과가 없습니다.");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        }
+
+        @Test
+        void oneMatchIdTest() throws Exception {
+            showProductRepository.save(
+                    ShowProduct.builder().grade("bronze").productId("123").showTime(LocalDateTime.now()).build());
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL + "?grade=bronze")
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString()).isEqualTo("1");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+        @Test
+        void allSearchTest() throws Exception {
+            showProductRepository.save(
+                    ShowProduct.builder().grade("bronze").productId("123").showTime(LocalDateTime.now()).build());
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL)
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString()).isEqualTo("1");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
     }
 
-    @Test
-    void zeroMismatchIdTest() throws Exception {
-        showProductRepository.save(ShowProduct.builder().productId("123").showTime(LocalDateTime.now()).build());
-
-        MockHttpServletResponse response = mockMvc.perform(
-                        get("/product/count?productId=1")
-                )
-                .andReturn()
-                .getResponse();
-        assertThat(response.getContentAsString()).isEqualTo("0");
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-    }
-
-    @Test
-    void oneMatchIdTest() throws Exception {
-        showProductRepository.save(ShowProduct.builder().productId("123").showTime(LocalDateTime.now()).build());
-
-        MockHttpServletResponse response = mockMvc.perform(
-                        get("/product/count?productId=123")
-                )
-                .andReturn()
-                .getResponse();
-        assertThat(response.getContentAsString()).isEqualTo("1");
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-    }
-
-    @Test
-    void allSearchTest() throws Exception {
-        showProductRepository.save(ShowProduct.builder().productId("123").showTime(LocalDateTime.now()).build());
-
-        MockHttpServletResponse response = mockMvc.perform(
-                        get("/product/count")
-                )
-                .andReturn()
-                .getResponse();
-        assertThat(response.getContentAsString()).isEqualTo("1");
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-    }
 }
