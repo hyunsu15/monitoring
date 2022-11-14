@@ -1,5 +1,6 @@
 package com.example.monitoring.order.service;
 
+import com.example.monitoring.common.exception.NoSearchElementException;
 import com.example.monitoring.common.util.grade.Grade;
 import com.example.monitoring.common.util.grade.GradeRouter;
 import com.example.monitoring.order.domain.Order;
@@ -7,12 +8,15 @@ import com.example.monitoring.order.dto.FailOrderRequest;
 import com.example.monitoring.order.dto.FailOrderResponse;
 import com.example.monitoring.order.dto.MustGradeRequest;
 import com.example.monitoring.order.dto.OrderRequest;
+import com.example.monitoring.order.dto.OrderResponse;
+import com.example.monitoring.order.dto.OrderSearchRequest;
 import com.example.monitoring.order.repository.OrderRepository;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -126,6 +130,16 @@ public class OrderService {
                         .account(request.getAccount())
                         .build()
         );
+    }
 
+    public List<OrderResponse> searchByName(OrderSearchRequest request) {
+        List<Order> orderList = orderRepository
+                .findBySignUpTimeBetweenAndAccount(request.getStartTime(), request.getEndTime(), request.getAccount());
+        if (orderList.isEmpty()) {
+            throw new NoSearchElementException();
+        }
+        return orderList.stream()
+                .map(x -> OrderResponse.makeOrderResponse(x))
+                .collect(Collectors.toList());
     }
 }

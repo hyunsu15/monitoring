@@ -20,4 +20,7 @@ public interface OrderRepository extends MongoRepository<Order, ObjectId> {
 
     @Query(value = "{ 'orderTime' : {$gte : ?0, $lte: ?1 },'grade': {$regex : ?2, $options: 'i'}}")
     List<Order> findByOrderTimeBetweenAndGrade(LocalDateTime startTime, LocalDateTime endTime, String grade);
+
+    @Query(value = "{ 'orderTime' : {$gte : ?0, $lte: ?1 }, 'account' : ?2 }")
+    List<Order> findBySignUpTimeBetweenAndAccount(LocalDateTime startTime, LocalDateTime endTime, String account);
 }

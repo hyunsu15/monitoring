@@ -8,6 +8,8 @@ import com.example.monitoring.order.dto.FailOrderRequest;
 import com.example.monitoring.order.dto.FailOrderResponse;
 import com.example.monitoring.order.dto.MustGradeRequest;
 import com.example.monitoring.order.dto.OrderRequest;
+import com.example.monitoring.order.dto.OrderResponse;
+import com.example.monitoring.order.dto.OrderSearchRequest;
 import com.example.monitoring.order.service.OrderService;
 import java.util.List;
 import javax.validation.Valid;
@@ -48,18 +50,25 @@ public class OrderController {
     }
 
     @GetMapping("/fail")
-    public ResponseEntity<List<FailOrderResponse>> getFailCartResponse(@Valid FailOrderRequest request,
-                                                                       BindingResult result) {
+    public ResponseEntity<List<FailOrderResponse>> getFailOrderResponse(@Valid FailOrderRequest request,
+                                                                        BindingResult result) {
         checkError(result, () -> new IllegalDateException());
         return ResponseEntity.ok().body(orderService.getFailOrders(request));
     }
 
     @PostMapping()
-    public ResponseEntity<Void> addAddCartRecord(@Valid @RequestBody OrderRequest request,
-                                                 BindingResult result) {
+    public ResponseEntity<Void> addOrderRecord(@Valid @RequestBody OrderRequest request,
+                                               BindingResult result) {
         checkError(result, () -> new IllegalDateException());
         orderService.addOrderRecord(request);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<OrderResponse>> searchByName(@Valid OrderSearchRequest request, BindingResult result) {
+        checkError(result, () -> new IllegalDateException());
+        List<OrderResponse> searchList = orderService.searchByName(request);
+        return ResponseEntity.ok().body(searchList);
     }
 
 }
