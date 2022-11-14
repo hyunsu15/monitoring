@@ -1,12 +1,17 @@
 package com.example.monitoring.addCart.service;
 
+import com.example.monitoring.addCart.domain.AddCart;
 import com.example.monitoring.addCart.dto.AddCartRequest;
+import com.example.monitoring.addCart.dto.FailAddCartRequest;
+import com.example.monitoring.addCart.dto.FailAddCartResponse;
 import com.example.monitoring.addCart.repository.AddCartRepository;
 import com.example.monitoring.common.util.grade.Grade;
 import com.example.monitoring.common.util.grade.GradeRouter;
-import com.example.monitoring.showProduct.domain.ShowProduct;
 import com.example.monitoring.showProduct.dto.MustGradeRequest;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,8 +36,8 @@ public class AddCartService {
 
     private long getCount(
             AddCartRequest request
-            , Supplier<List<ShowProduct>> returnIfnull
-            , Supplier<List<ShowProduct>> returnElse) {
+            , Supplier<List<AddCart>> returnIfnull
+            , Supplier<List<AddCart>> returnElse) {
         if (request.getProductId() == null) {
             return Long.valueOf(returnIfnull.get().size());
         }
@@ -41,8 +46,8 @@ public class AddCartService {
 
     private long getCount(
             MustGradeRequest request
-            , Supplier<List<ShowProduct>> returnIfnull
-            , Supplier<List<ShowProduct>> returnElse) {
+            , Supplier<List<AddCart>> returnIfnull
+            , Supplier<List<AddCart>> returnElse) {
         if (request.getProductId() == null) {
             return Long.valueOf(returnIfnull.get().size());
         }
@@ -83,5 +88,33 @@ public class AddCartService {
                             , grade.getGrade()));
         }
         return count;
+    }
+
+    public List<FailAddCartResponse> getFailAddCarts(FailAddCartRequest request) {
+        Map<String, Long> successMap = new HashMap<>();
+        Map<String, Long> failMap = new HashMap<>();
+        initMap(request, successMap, failMap);
+        List<FailAddCartResponse> failList = new ArrayList<>();
+        for (String productId : failMap.keySet()) {
+            double percent =
+                    (double) failMap.get(productId) / (failMap.get(productId) + successMap.getOrDefault(productId, 0L))
+                            * 100;
+            if (percent >= request.getPercent()) {
+                failList.add(FailAddCartResponse.builder().productId(productId).percent(percent).build());
+            }
+        }
+        return failList;
+    }
+
+    private void initMap(FailAddCartRequest request, Map<String, Long> successMap, Map<String, Long> failMap) {
+        List<AddCart> addCarts = addCartRepository.findByAddTimeBetween(request.getStartTime(), request.getEndTime());
+        for (AddCart addCart : addCarts) {
+            if (addCart.isSuccess()) {
+                successMap.merge(addCart.getProductId(), 1L, Long::sum);
+            }
+            if (!addCart.isSuccess()) {
+                failMap.merge(addCart.getProductId(), 1L, Long::sum);
+            }
+        }
     }
 }

@@ -3,9 +3,13 @@ package com.example.monitoring.api;
 import static com.example.monitoring.common.util.Validator.checkError;
 
 import com.example.monitoring.addCart.dto.AddCartRequest;
+import com.example.monitoring.addCart.dto.FailAddCartRequest;
+import com.example.monitoring.addCart.dto.FailAddCartResponse;
+import com.example.monitoring.addCart.exception.NoMisMatchPercentException;
 import com.example.monitoring.addCart.service.AddCartService;
 import com.example.monitoring.common.exception.NoMisMatchGradeException;
 import com.example.monitoring.showProduct.dto.MustGradeRequest;
+import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +43,13 @@ public class AddCartController {
         checkError(result, () -> new NoMisMatchGradeException());
         return ResponseEntity.ok().body(addCartService.countGradeMoreThan(request));
     }
-//3. 기한안에 특정 등급인 사람이 담은 수
-//4. 기한안에 장바구니가 ~% 실패한경우
+
+    @GetMapping("/fail")
+    public ResponseEntity<List<FailAddCartResponse>> getFailCartResponse(@Valid FailAddCartRequest request,
+                                                                         BindingResult result) {
+        checkError(result, () -> new NoMisMatchPercentException());
+        return ResponseEntity.ok().body(addCartService.getFailAddCarts(request));
+    }
+
 
 }
