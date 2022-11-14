@@ -35,13 +35,13 @@ public class OrderController {
         checkError(result, () -> new NoMisMatchGradeException());
         return ResponseEntity.ok().body(orderService.countGradeEquals(request));
     }
-//
-//    @GetMapping("/count/grade/more")
-//    public ResponseEntity<Long> countGradeMoreThan(@Valid MustGradeRequest request, BindingResult result) {
-//        checkError(result, () -> new NoMisMatchGradeException());
-//        return ResponseEntity.ok().body(addCartService.countGradeMoreThan(request));
-//    }
-//
+
+    @GetMapping("/count/grade/more")
+    public ResponseEntity<Long> countGradeMoreThan(@Valid MustGradeRequest request, BindingResult result) {
+        checkError(result, () -> new NoMisMatchGradeException());
+        return ResponseEntity.ok().body(orderService.countGradeMoreThan(request));
+    }
+
 //    @GetMapping("/fail")
 //    public ResponseEntity<List<FailAddCartResponse>> getFailCartResponse(@Valid FailAddCartRequest request,
 //                                                                         BindingResult result) {

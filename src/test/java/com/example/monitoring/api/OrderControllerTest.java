@@ -42,6 +42,11 @@ class OrderControllerTest {
                 .forEach(CrudRepository::deleteAll);
     }
 
+    private void saveOneThing(String grade, String product) {
+        repository.save(
+                Order.builder().grade(grade).productId(product).orderTime(LocalDateTime.now()).build());
+    }
+
     @Nested
     class CountTest {
         private static final String URL = "/order";
@@ -128,8 +133,7 @@ class OrderControllerTest {
 
         @Test
         void zeroMismatchIdTest() throws Exception {
-            repository.save(
-                    Order.builder().grade("GOLD").productId("123").orderTime(LocalDateTime.now()).build());
+            saveOneThing("GOLD", "123");
 
             MockHttpServletResponse response = mockMvc.perform(
                             get(URL + "?grade=bronze")
@@ -142,8 +146,7 @@ class OrderControllerTest {
 
         @Test
         void oneMatchIdTest() throws Exception {
-            repository.save(
-                    Order.builder().grade("BRONZE").productId("123").orderTime(LocalDateTime.now()).build());
+            saveOneThing("BRONZE", "123");
 
             MockHttpServletResponse response = mockMvc.perform(
                             get(URL + "?grade=bronze")
@@ -156,4 +159,49 @@ class OrderControllerTest {
 
     }
 
+    @Nested
+    class GradeMoreThanTest {
+        private static final String URL = "/order/count/grade/more";
+
+        @Test
+        void emptyShowTest() throws Exception {
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL)
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).contains(ERROR_MESSAGE);
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        }
+
+        @Test
+        void zeroMismatchIdTest() throws Exception {
+            saveOneThing("BRONZE", "123");
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL + "?grade=GOLD")
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString()).isEqualTo("0");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+        @Test
+        void oneMatchIdTest() throws Exception {
+            String grade = "GOLD";
+            String product = "123";
+            saveOneThing(grade, product);
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL + "?grade=bronze")
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).isEqualTo("1");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+
+    }
 }

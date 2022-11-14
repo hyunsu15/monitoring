@@ -64,25 +64,25 @@ public class OrderService {
                         , grade.getGrade()));
         return count;
     }
-//
-//    public Long countGradeMoreThan(MustGradeRequest request) {
-//        List<Grade> grades = gradeRouter.findByGradeListElseThrow(request.getGrade());
-//        long count = 0;
-//        for (Grade grade : grades) {
-//            count += getCount(
-//                    request
-//                    , () -> addCartRepository.findByAddTimeBetweenAndGrade(
-//                            request.getStartTime()
-//                            , request.getEndTime()
-//                            , grade.getGrade())
-//                    , () -> addCartRepository.findByAddTimeBetweenAndProductIdAndGrade(
-//                            request.getStartTime()
-//                            , request.getEndTime()
-//                            , request.getProductId()
-//                            , grade.getGrade()));
-//        }
-//        return count;
-//    }
+
+    public Long countGradeMoreThan(MustGradeRequest request) {
+        List<Grade> grades = gradeRouter.findByGradeListElseThrow(request.getGrade());
+        long count = 0;
+        for (Grade grade : grades) {
+            count += getCount(
+                    request
+                    , () -> orderRepository.findByOrderTimeBetweenAndGrade(
+                            request.getStartTime()
+                            , request.getEndTime()
+                            , grade.getGrade())
+                    , () -> orderRepository.findByOrderTimeBetweenAndProductIdAndGrade(
+                            request.getStartTime()
+                            , request.getEndTime()
+                            , request.getProductId()
+                            , grade.getGrade()));
+        }
+        return count;
+    }
 //
 //    public List<FailAddCartResponse> getFailAddCarts(FailAddCartRequest request) {
 //        Map<String, Long> successMap = new HashMap<>();
