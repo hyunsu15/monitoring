@@ -1,6 +1,5 @@
 package com.example.monitoring.showProduct.service;
 
-import com.example.monitoring.common.exception.NoSearchElementException;
 import com.example.monitoring.common.util.grade.Grade;
 import com.example.monitoring.common.util.grade.GradeRouter;
 import com.example.monitoring.showProduct.domain.ShowProduct;
@@ -28,7 +27,7 @@ public class ShowProductService {
                 , () -> showProductRepository
                         .findByShowTimeBetweenAndProduct(request.getStartTime(), request.getEndTime(),
                                 request.getProductId()));
-        return validateThenGet(count);
+        return count;
     }
 
     private long getCount(
@@ -39,13 +38,6 @@ public class ShowProductService {
             return Long.valueOf(returnIfnull.get().size());
         }
         return Long.valueOf(returnElse.get().size());
-    }
-
-    private Long validateThenGet(long value) {
-        if (value == 0) {
-            throw new NoSearchElementException();
-        }
-        return value;
     }
 
     public Long countGradeEquals(ShowProductRequest request) {
@@ -61,6 +53,25 @@ public class ShowProductService {
                         , request.getEndTime()
                         , request.getProductId()
                         , grade.getGrade()));
-        return validateThenGet(count);
+        return count;
+    }
+
+    public Long countGradeMoreThan(ShowProductRequest request) {
+        List<Grade> grades = gradeRouter.findByGradeListElseGetBronze(request.getGrade());
+        long count = 0;
+        for (Grade grade : grades) {
+            count += getCount(
+                    request
+                    , () -> showProductRepository.findByShowTimeBetweenAndGrade(
+                            request.getStartTime()
+                            , request.getEndTime()
+                            , grade.getGrade())
+                    , () -> showProductRepository.findByShowTimeBetweenAndProductIdAndGrade(
+                            request.getStartTime()
+                            , request.getEndTime()
+                            , request.getProductId()
+                            , grade.getGrade()));
+        }
+        return count;
     }
 }

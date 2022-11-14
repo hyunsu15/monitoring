@@ -20,9 +20,6 @@ public class SignUpService {
         long count = signUpRepository
                 .findBySignUpTimeBetween(request.getStartTime(), request.getEndTime())
                 .size();
-        if (count == 0) {
-            throw new NoSearchElementException();
-        }
         return count;
     }
 

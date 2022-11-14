@@ -30,5 +30,9 @@ public class ShowProductController {
         return ResponseEntity.ok().body(showProductService.countGradeEquals(request));
     }
 
+    @GetMapping("/count/grade/more")
+    public ResponseEntity<Long> countGradeMoreThan(@Valid ShowProductRequest request) {
+        return ResponseEntity.ok().body(showProductService.countGradeMoreThan(request));
+    }
 
 }

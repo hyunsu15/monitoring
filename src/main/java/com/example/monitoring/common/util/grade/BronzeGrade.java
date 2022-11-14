@@ -6,6 +6,11 @@ import org.springframework.stereotype.Component;
 public class BronzeGrade implements Grade {
 
     @Override
+    public int getGradeValue() {
+        return 1;
+    }
+
+    @Override
     public String getGrade() {
         return "BRONZE";
     }

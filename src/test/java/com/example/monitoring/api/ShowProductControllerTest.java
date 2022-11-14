@@ -51,8 +51,9 @@ class ShowProductControllerTest {
                     )
                     .andReturn()
                     .getResponse();
-            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).contains("검색 결과가 없습니다.");
-            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).isEqualTo("0");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+
         }
 
         @Test
@@ -77,8 +78,8 @@ class ShowProductControllerTest {
                     )
                     .andReturn()
                     .getResponse();
-            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).contains("검색 결과가 없습니다.");
-            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).isEqualTo("0");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         }
 
         @Test
@@ -111,6 +112,7 @@ class ShowProductControllerTest {
     @Nested
     class GradeTest {
         private static final String URL = "/product/count/grade";
+        private static final String ERROR_MESSAGE = "grade 파라미터를 다시 확인해주세요.";
 
         @Test
         void emptyShowTest() throws Exception {
@@ -119,21 +121,8 @@ class ShowProductControllerTest {
                     )
                     .andReturn()
                     .getResponse();
-            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).contains("검색 결과가 없습니다.");
+            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).contains(ERROR_MESSAGE);
             assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-        }
-
-        @Test
-        void oneShowTest() throws Exception {
-            showProductRepository.save(ShowProduct.builder().grade("BRONZE").showTime(LocalDateTime.now()).build());
-
-            MockHttpServletResponse response = mockMvc.perform(
-                            get(URL)
-                    )
-                    .andReturn()
-                    .getResponse();
-            assertThat(response.getContentAsString()).isEqualTo("1");
-            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         }
 
         @Test
@@ -146,14 +135,14 @@ class ShowProductControllerTest {
                     )
                     .andReturn()
                     .getResponse();
-            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).contains("검색 결과가 없습니다.");
-            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).isEqualTo("0");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         }
 
         @Test
         void oneMatchIdTest() throws Exception {
             showProductRepository.save(
-                    ShowProduct.builder().grade("bronze").productId("123").showTime(LocalDateTime.now()).build());
+                    ShowProduct.builder().grade("BRONZE").productId("123").showTime(LocalDateTime.now()).build());
 
             MockHttpServletResponse response = mockMvc.perform(
                             get(URL + "?grade=bronze")
@@ -164,19 +153,52 @@ class ShowProductControllerTest {
             assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         }
 
-        @Test
-        void allSearchTest() throws Exception {
-            showProductRepository.save(
-                    ShowProduct.builder().grade("bronze").productId("123").showTime(LocalDateTime.now()).build());
+    }
 
+    @Nested
+    class GradeMoreThanTest {
+        private static final String URL = "/product/count/grade/more";
+        private static final String ERROR_MESSAGE = "grade 파라미터를 다시 확인해주세요.";
+
+        @Test
+        void emptyShowTest() throws Exception {
             MockHttpServletResponse response = mockMvc.perform(
                             get(URL)
                     )
                     .andReturn()
                     .getResponse();
-            assertThat(response.getContentAsString()).isEqualTo("1");
+            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).contains(ERROR_MESSAGE);
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        }
+
+        @Test
+        void zeroMismatchIdTest() throws Exception {
+            showProductRepository.save(
+                    ShowProduct.builder().grade("BRONZE").productId("123").showTime(LocalDateTime.now()).build());
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL + "?grade=GOLD")
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString()).isEqualTo("0");
             assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         }
-    }
 
+        @Test
+        void oneMatchIdTest() throws Exception {
+            showProductRepository.save(
+                    ShowProduct.builder().grade("GOLD").productId("123").showTime(LocalDateTime.now()).build());
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL + "?grade=bronze")
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(response.getContentAsString(StandardCharsets.UTF_8)).isEqualTo("1");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+
+    }
 }

@@ -44,8 +44,8 @@ class SignUpControllerTest {
                 )
                 .andReturn()
                 .getResponse();
-        assertThat(response.getContentAsString(StandardCharsets.UTF_8)).contains("검색 결과가 없습니다.");
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString(StandardCharsets.UTF_8)).isEqualTo("0");
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
     }
 
     @Test

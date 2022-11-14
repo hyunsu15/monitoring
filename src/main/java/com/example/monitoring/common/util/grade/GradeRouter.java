@@ -1,6 +1,8 @@
 package com.example.monitoring.common.util.grade;
 
+import com.example.monitoring.common.exception.NoMisMatchGradeException;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +16,14 @@ public class GradeRouter {
         return grades.stream()
                 .filter(x -> x.isSame(grade))
                 .findAny()
-                .orElseGet(() -> defaultGrade);
+                .orElseThrow(() -> new NoMisMatchGradeException());
     }
+
+    public List<Grade> findByGradeListElseGetBronze(String grade) {
+        int value = findByGradeElseGetBronze(grade).getGradeValue();
+        return grades.stream()
+                .filter(x -> x.getGradeValue() >= value)
+                .collect(Collectors.toList());
+    }
+
 }
