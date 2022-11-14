@@ -4,9 +4,12 @@ import static com.example.monitoring.common.util.Validator.checkError;
 
 import com.example.monitoring.common.exception.IllegalDateException;
 import com.example.monitoring.common.exception.NoMisMatchGradeException;
+import com.example.monitoring.order.dto.FailOrderRequest;
+import com.example.monitoring.order.dto.FailOrderResponse;
 import com.example.monitoring.order.dto.MustGradeRequest;
 import com.example.monitoring.order.dto.OrderRequest;
 import com.example.monitoring.order.service.OrderService;
+import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,13 +45,13 @@ public class OrderController {
         return ResponseEntity.ok().body(orderService.countGradeMoreThan(request));
     }
 
-//    @GetMapping("/fail")
-//    public ResponseEntity<List<FailAddCartResponse>> getFailCartResponse(@Valid FailAddCartRequest request,
-//                                                                         BindingResult result) {
-//        checkError(result, () -> new IllegalDateException());
-//        return ResponseEntity.ok().body(addCartService.getFailAddCarts(request));
-//    }
-//
+    @GetMapping("/fail")
+    public ResponseEntity<List<FailOrderResponse>> getFailCartResponse(@Valid FailOrderRequest request,
+                                                                       BindingResult result) {
+        checkError(result, () -> new IllegalDateException());
+        return ResponseEntity.ok().body(orderService.getFailOrders(request));
+    }
+
 //    @PostMapping()
 //    public ResponseEntity<Void> addAddCartRecord(@Valid @RequestBody AddCartRequest request,
 //                                                 BindingResult result) {

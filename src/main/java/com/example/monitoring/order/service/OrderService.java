@@ -3,10 +3,15 @@ package com.example.monitoring.order.service;
 import com.example.monitoring.common.util.grade.Grade;
 import com.example.monitoring.common.util.grade.GradeRouter;
 import com.example.monitoring.order.domain.Order;
+import com.example.monitoring.order.dto.FailOrderRequest;
+import com.example.monitoring.order.dto.FailOrderResponse;
 import com.example.monitoring.order.dto.MustGradeRequest;
 import com.example.monitoring.order.dto.OrderRequest;
 import com.example.monitoring.order.repository.OrderRepository;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -83,34 +88,34 @@ public class OrderService {
         }
         return count;
     }
-//
-//    public List<FailAddCartResponse> getFailAddCarts(FailAddCartRequest request) {
-//        Map<String, Long> successMap = new HashMap<>();
-//        Map<String, Long> failMap = new HashMap<>();
-//        initMap(request, successMap, failMap);
-//        List<FailAddCartResponse> failList = new ArrayList<>();
-//        for (String productId : failMap.keySet()) {
-//            double percent =
-//                    (double) failMap.get(productId) / (failMap.get(productId) + successMap.getOrDefault(productId, 0L))
-//                            * 100;
-//            if (percent >= request.getPercent()) {
-//                failList.add(FailAddCartResponse.builder().productId(productId).percent(percent).build());
-//            }
-//        }
-//        return failList;
-//    }
-//
-//    private void initMap(FailAddCartRequest request, Map<String, Long> successMap, Map<String, Long> failMap) {
-//        List<AddCart> addCarts = addCartRepository.findByAddTimeBetween(request.getStartTime(), request.getEndTime());
-//        for (AddCart addCart : addCarts) {
-//            if (addCart.isSuccess()) {
-//                successMap.merge(addCart.getProductId(), 1L, Long::sum);
-//            }
-//            if (!addCart.isSuccess()) {
-//                failMap.merge(addCart.getProductId(), 1L, Long::sum);
-//            }
-//        }
-//    }
+
+    public List<FailOrderResponse> getFailOrders(FailOrderRequest request) {
+        Map<String, Long> successMap = new HashMap<>();
+        Map<String, Long> failMap = new HashMap<>();
+        initMap(request, successMap, failMap);
+        List<FailOrderResponse> failList = new ArrayList<>();
+        for (String productId : failMap.keySet()) {
+            double percent =
+                    (double) failMap.get(productId) / (failMap.get(productId) + successMap.getOrDefault(productId, 0L))
+                            * 100;
+            if (percent >= request.getPercent()) {
+                failList.add(FailOrderResponse.builder().productId(productId).percent(percent).build());
+            }
+        }
+        return failList;
+    }
+
+    private void initMap(FailOrderRequest request, Map<String, Long> successMap, Map<String, Long> failMap) {
+        List<Order> orders = orderRepository.findByOrderTimeBetween(request.getStartTime(), request.getEndTime());
+        for (Order order : orders) {
+            if (order.isSuccess()) {
+                successMap.merge(order.getProductId(), 1L, Long::sum);
+            }
+            if (!order.isSuccess()) {
+                failMap.merge(order.getProductId(), 1L, Long::sum);
+            }
+        }
+    }
 //
 //    public void addAddCartRecord(AddCartRequest request) {
 //        addCartRepository.save(

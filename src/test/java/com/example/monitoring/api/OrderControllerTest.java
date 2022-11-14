@@ -8,6 +8,7 @@ import com.example.monitoring.order.repository.OrderRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.AfterEach;
@@ -199,6 +200,62 @@ class OrderControllerTest {
                     .andReturn()
                     .getResponse();
             assertThat(response.getContentAsString(StandardCharsets.UTF_8)).isEqualTo("1");
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+    }
+
+    @Nested
+    class FailResponseTest {
+        private static final String URL = "/order/fail";
+        private static final String ERROR_MESSAGE = "퍼센트를 입력해주세요.";
+
+        @Test
+        void emptyShowTest() throws Exception {
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL)
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(objectMapper.readValue(
+                    response.getContentAsString(StandardCharsets.UTF_8)
+                    , List.class)).isEqualTo(new ArrayList());
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+        @Test
+        void zeroMismatchIdTest() throws Exception {
+            repository.save(
+                    Order.builder().grade("BRONZE").success(true).productId("123").orderTime(LocalDateTime.now())
+                            .build());
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL + "?percent=100")
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(
+                    objectMapper.readValue(
+                            response.getContentAsString()
+                            , List.class).size()).isEqualTo(0);
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+        @Test
+        void oneMatchIdTest() throws Exception {
+            repository.save(
+                    Order.builder().grade("GOLD").success(false).productId("123").orderTime(LocalDateTime.now())
+                            .build());
+
+            MockHttpServletResponse response = mockMvc.perform(
+                            get(URL + "?percent=100")
+                    )
+                    .andReturn()
+                    .getResponse();
+            assertThat(
+                    objectMapper.readValue(
+                            response.getContentAsString()
+                            , List.class).size()).isEqualTo(1);
             assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         }
 
