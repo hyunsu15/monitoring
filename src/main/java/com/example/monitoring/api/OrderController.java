@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -52,12 +54,12 @@ public class OrderController {
         return ResponseEntity.ok().body(orderService.getFailOrders(request));
     }
 
-//    @PostMapping()
-//    public ResponseEntity<Void> addAddCartRecord(@Valid @RequestBody AddCartRequest request,
-//                                                 BindingResult result) {
-//        checkError(result, () -> new IllegalDateException());
-//        addCartService.addAddCartRecord(request);
-//        return ResponseEntity.ok().build();
-//    }
+    @PostMapping()
+    public ResponseEntity<Void> addAddCartRecord(@Valid @RequestBody OrderRequest request,
+                                                 BindingResult result) {
+        checkError(result, () -> new IllegalDateException());
+        orderService.addOrderRecord(request);
+        return ResponseEntity.ok().build();
+    }
 
 }

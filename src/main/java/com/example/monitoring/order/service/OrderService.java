@@ -116,15 +116,16 @@ public class OrderService {
             }
         }
     }
-//
-//    public void addAddCartRecord(AddCartRequest request) {
-//        addCartRepository.save(
-//                AddCart.builder()
-//                        .grade(request.getGrade())
-//                        .productId(request.getProductId())
-//                        .success(request.isSuccess())
-//                        .account(request.getAccount())
-//                        .build()
-//        );
-//    }
+
+    public void addOrderRecord(OrderRequest request) {
+        orderRepository.save(
+                Order.builder()
+                        .grade(request.getGrade())
+                        .productId(request.getProductId())
+                        .success(request.isSuccess())
+                        .account(request.getAccount())
+                        .build()
+        );
+
+    }
 }

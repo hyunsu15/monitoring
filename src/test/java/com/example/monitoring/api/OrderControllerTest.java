@@ -2,7 +2,9 @@ package com.example.monitoring.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
+import com.example.monitoring.addCart.domain.AddCart;
 import com.example.monitoring.order.domain.Order;
 import com.example.monitoring.order.repository.OrderRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -41,6 +44,21 @@ class OrderControllerTest {
     void tearDown() {
         repositorys.stream()
                 .forEach(CrudRepository::deleteAll);
+    }
+
+    @Test
+    void addTest() throws Exception {
+        AddCart addCart = AddCart.builder().account("q").grade("BRONZE").addTime(LocalDateTime.now()).build();
+        MockHttpServletResponse response = mockMvc.perform(
+                        post("/order")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(addCart))
+                )
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(repository.findAll().size()).isEqualTo(1);
     }
 
     private void saveOneThing(String grade, String product) {
