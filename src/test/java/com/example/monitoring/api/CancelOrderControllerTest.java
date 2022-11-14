@@ -11,10 +11,12 @@ import com.example.monitoring.order.repository.OrderRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,20 @@ class CancelOrderControllerTest {
         repositorys.stream()
                 .forEach(CrudRepository::deleteAll);
     }
+
+    @DisplayName("이름 찾기 체크")
+    @Test
+    void nameSearchTest() {
+        LocalDateTime startTime = LocalDateTime.now();
+        LocalDateTime endTime = startTime.plus(1, ChronoUnit.DAYS);
+        LocalDateTime signTime = startTime;
+        String name = "qwe";
+        repository.save(CancelOrder.builder().account(name).cancelTime(signTime).build());
+        long except = repository.findBySignUpTimeBetweenAndAccount(startTime, endTime, name).size();
+        int result = 1;
+        assertThat(except).isEqualTo(result);
+    }
+
 
     @Test
     void addTest() throws Exception {

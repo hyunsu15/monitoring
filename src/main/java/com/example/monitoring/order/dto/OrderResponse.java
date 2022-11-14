@@ -3,7 +3,9 @@ package com.example.monitoring.order.dto;
 import com.example.monitoring.order.domain.Order;
 import java.time.LocalDateTime;
 import lombok.Builder;
+import lombok.Getter;
 
+@Getter
 public class OrderResponse {
     private boolean success;
     private String account;

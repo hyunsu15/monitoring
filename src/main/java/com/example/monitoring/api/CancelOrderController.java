@@ -3,6 +3,8 @@ package com.example.monitoring.api;
 import static com.example.monitoring.common.util.Validator.checkError;
 
 import com.example.monitoring.cancelOrder.dto.CancelOrderRequest;
+import com.example.monitoring.cancelOrder.dto.CancelOrderResponse;
+import com.example.monitoring.cancelOrder.dto.CancelOrderSearchRequest;
 import com.example.monitoring.cancelOrder.dto.CancelPercentRequest;
 import com.example.monitoring.cancelOrder.dto.CancelPercentResponse;
 import com.example.monitoring.cancelOrder.dto.MustGradeRequest;
@@ -62,11 +64,12 @@ public class CancelOrderController {
         return ResponseEntity.ok().build();
     }
 
-//    @GetMapping("/search")
-//    public ResponseEntity<List<OrderResponse>> searchByName(@Valid OrderSearchRequest request, BindingResult result) {
-//        checkError(result, () -> new IllegalDateException());
-//        List<OrderResponse> searchList = cancelOrderService.searchByName(request);
-//        return ResponseEntity.ok().body(searchList);
-//    }
+    @GetMapping("/search")
+    public ResponseEntity<List<CancelOrderResponse>> searchByName(@Valid CancelOrderSearchRequest request,
+                                                                  BindingResult result) {
+        checkError(result, () -> new IllegalDateException());
+        List<CancelOrderResponse> searchList = cancelOrderService.searchByName(request);
+        return ResponseEntity.ok().body(searchList);
+    }
 
 }

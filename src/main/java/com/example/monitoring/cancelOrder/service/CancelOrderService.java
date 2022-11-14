@@ -2,10 +2,13 @@ package com.example.monitoring.cancelOrder.service;
 
 import com.example.monitoring.cancelOrder.domain.CancelOrder;
 import com.example.monitoring.cancelOrder.dto.CancelOrderRequest;
+import com.example.monitoring.cancelOrder.dto.CancelOrderResponse;
+import com.example.monitoring.cancelOrder.dto.CancelOrderSearchRequest;
 import com.example.monitoring.cancelOrder.dto.CancelPercentRequest;
 import com.example.monitoring.cancelOrder.dto.CancelPercentResponse;
 import com.example.monitoring.cancelOrder.dto.MustGradeRequest;
 import com.example.monitoring.cancelOrder.repository.CancelOrderRepository;
+import com.example.monitoring.common.exception.NoSearchElementException;
 import com.example.monitoring.common.util.grade.Grade;
 import com.example.monitoring.common.util.grade.GradeRouter;
 import com.example.monitoring.order.domain.Order;
@@ -15,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -144,14 +148,14 @@ public class CancelOrderService {
         return orderMap;
     }
 
-//    public List<OrderResponse> searchByName(OrderSearchRequest request) {
-//        List<CancelOrder> orderList = cancelOrderRepository
-//                .findBySignUpTimeBetweenAndAccount(request.getStartTime(), request.getEndTime(), request.getAccount());
-//        if (orderList.isEmpty()) {
-//            throw new NoSearchElementException();
-//        }
-//        return orderList.stream()
-//                .map(x -> OrderResponse.makeOrderResponse(x))
-//                .collect(Collectors.toList());
-//    }
+    public List<CancelOrderResponse> searchByName(CancelOrderSearchRequest request) {
+        List<CancelOrder> orderList = cancelOrderRepository
+                .findBySignUpTimeBetweenAndAccount(request.getStartTime(), request.getEndTime(), request.getAccount());
+        if (orderList.isEmpty()) {
+            throw new NoSearchElementException();
+        }
+        return orderList.stream()
+                .map(x -> CancelOrderResponse.makeOrderResponse(x))
+                .collect(Collectors.toList());
+    }
 }
