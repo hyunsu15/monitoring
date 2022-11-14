@@ -34,6 +34,11 @@ public class AddCartController {
         return ResponseEntity.ok().body(addCartService.countGradeEquals(request));
     }
 
+    @GetMapping("/count/grade/more")
+    public ResponseEntity<Long> countGradeMoreThan(@Valid MustGradeRequest request, BindingResult result) {
+        checkError(result, () -> new NoMisMatchGradeException());
+        return ResponseEntity.ok().body(addCartService.countGradeMoreThan(request));
+    }
 //3. 기한안에 특정 등급인 사람이 담은 수
 //4. 기한안에 장바구니가 ~% 실패한경우
 

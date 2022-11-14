@@ -65,4 +65,23 @@ public class AddCartService {
                         , grade.getGrade()));
         return count;
     }
+
+    public Long countGradeMoreThan(MustGradeRequest request) {
+        List<Grade> grades = gradeRouter.findByGradeListElseGetBronze(request.getGrade());
+        long count = 0;
+        for (Grade grade : grades) {
+            count += getCount(
+                    request
+                    , () -> addCartRepository.findByAddTimeBetweenAndGrade(
+                            request.getStartTime()
+                            , request.getEndTime()
+                            , grade.getGrade())
+                    , () -> addCartRepository.findByAddTimeBetweenAndProductIdAndGrade(
+                            request.getStartTime()
+                            , request.getEndTime()
+                            , request.getProductId()
+                            , grade.getGrade()));
+        }
+        return count;
+    }
 }
