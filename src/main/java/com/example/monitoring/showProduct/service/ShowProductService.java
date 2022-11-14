@@ -3,6 +3,7 @@ package com.example.monitoring.showProduct.service;
 import com.example.monitoring.common.util.grade.Grade;
 import com.example.monitoring.common.util.grade.GradeRouter;
 import com.example.monitoring.showProduct.domain.ShowProduct;
+import com.example.monitoring.showProduct.dto.MustGradeRequest;
 import com.example.monitoring.showProduct.dto.ShowProductRequest;
 import com.example.monitoring.showProduct.repository.ShowProductRepository;
 import java.util.List;
@@ -31,6 +32,16 @@ public class ShowProductService {
     }
 
     private long getCount(
+            MustGradeRequest request
+            , Supplier<List<ShowProduct>> returnIfnull
+            , Supplier<List<ShowProduct>> returnElse) {
+        if (request.getProductId() == null) {
+            return Long.valueOf(returnIfnull.get().size());
+        }
+        return Long.valueOf(returnElse.get().size());
+    }
+
+    private long getCount(
             ShowProductRequest request
             , Supplier<List<ShowProduct>> returnIfnull
             , Supplier<List<ShowProduct>> returnElse) {
@@ -40,7 +51,7 @@ public class ShowProductService {
         return Long.valueOf(returnElse.get().size());
     }
 
-    public Long countGradeEquals(ShowProductRequest request) {
+    public Long countGradeEquals(MustGradeRequest request) {
         Grade grade = gradeRouter.findByGradeElseGetBronze(request.getGrade());
         long count = getCount(
                 request
@@ -56,7 +67,7 @@ public class ShowProductService {
         return count;
     }
 
-    public Long countGradeMoreThan(ShowProductRequest request) {
+    public Long countGradeMoreThan(MustGradeRequest request) {
         List<Grade> grades = gradeRouter.findByGradeListElseGetBronze(request.getGrade());
         long count = 0;
         for (Grade grade : grades) {
@@ -73,5 +84,16 @@ public class ShowProductService {
                             , grade.getGrade()));
         }
         return count;
+    }
+
+    public void addShowProductRecord(ShowProductRequest request) {
+        showProductRepository.save(
+                ShowProduct.builder()
+                        .account(request.getAccount())
+                        .productId(request.getProductId())
+                        .grade(request.getGrade())
+                        .showTime(request.getShowTime())
+                        .build()
+        );
     }
 }

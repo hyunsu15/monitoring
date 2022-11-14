@@ -1,13 +1,13 @@
 package com.example.monitoring.api;
 
-import com.example.monitoring.common.exception.BaseException;
+import static com.example.monitoring.common.util.Validator.checkError;
+
 import com.example.monitoring.common.exception.IllegalDateException;
 import com.example.monitoring.signup.dto.SearchResponse;
 import com.example.monitoring.signup.dto.SignUpRequest;
 import com.example.monitoring.signup.exception.NullNameException;
 import com.example.monitoring.signup.service.SignUpService;
 import java.util.List;
-import java.util.function.Supplier;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,18 +43,8 @@ public class SignUpController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> addSignUpRecord(@Valid SignUpRequest request, BindingResult result) {
+    public ResponseEntity<Void> addSignUpRecord(@Valid @RequestBody SignUpRequest request, BindingResult result) {
         signUpService.addSignUpRecord(request);
         return ResponseEntity.ok().build();
-    }
-
-    private void checkError(BindingResult result, Supplier<? extends BaseException> supplier) {
-        checkError(result.hasErrors(), supplier);
-    }
-
-    private void checkError(boolean isError, Supplier<? extends BaseException> supplier) {
-        if (isError) {
-            throw supplier.get();
-        }
     }
 }

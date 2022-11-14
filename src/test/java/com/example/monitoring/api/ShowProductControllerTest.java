@@ -2,6 +2,7 @@ package com.example.monitoring.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import com.example.monitoring.showProduct.domain.ShowProduct;
 import com.example.monitoring.showProduct.repository.ShowProductRepository;
@@ -19,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -41,6 +43,21 @@ class ShowProductControllerTest {
         repository.stream()
                 .forEach(CrudRepository::deleteAll);
     }
+
+    @Test
+    void addTest() throws Exception {
+        ShowProduct product = ShowProduct.builder().account("q").showTime(LocalDateTime.now()).build();
+        MockHttpServletResponse response = mockMvc.perform(
+                        post("/signup")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(product))
+                )
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+    }
+
 
     @Nested
     class CountTest {

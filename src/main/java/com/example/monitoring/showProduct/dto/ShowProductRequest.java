@@ -1,7 +1,7 @@
 package com.example.monitoring.showProduct.dto;
 
 import com.example.monitoring.common.dto.BaseRequest;
-import javax.validation.constraints.AssertFalse;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,12 +11,8 @@ public class ShowProductRequest extends BaseRequest {
     String account;
     String productId;
     String grade;
+    LocalDateTime showTime;
 
     public ShowProductRequest() {
-    }
-
-    @AssertFalse
-    private boolean isGradeNull() {
-        return grade == null || grade.trim().isEmpty();
     }
 }
