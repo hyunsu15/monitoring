@@ -2,11 +2,18 @@ package com.example.monitoring.cancelOrder.service;
 
 import com.example.monitoring.cancelOrder.domain.CancelOrder;
 import com.example.monitoring.cancelOrder.dto.CancelOrderRequest;
+import com.example.monitoring.cancelOrder.dto.CancelPercentRequest;
+import com.example.monitoring.cancelOrder.dto.CancelPercentResponse;
 import com.example.monitoring.cancelOrder.dto.MustGradeRequest;
 import com.example.monitoring.cancelOrder.repository.CancelOrderRepository;
 import com.example.monitoring.common.util.grade.Grade;
 import com.example.monitoring.common.util.grade.GradeRouter;
+import com.example.monitoring.order.domain.Order;
+import com.example.monitoring.order.repository.OrderRepository;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +21,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class CancelOrderService {
+    private final OrderRepository orderRepository;
     private final CancelOrderRepository cancelOrderRepository;
     private final GradeRouter gradeRouter;
 
@@ -84,34 +92,6 @@ public class CancelOrderService {
         return count;
     }
 
-//    public List<FailOrderResponse> getFailOrders(FailCancelOrderRequest request) {
-//        Map<String, Long> successMap = new HashMap<>();
-//        Map<String, Long> failMap = new HashMap<>();
-//        initMap(request, successMap, failMap);
-//        List<FailOrderResponse> failList = new ArrayList<>();
-//        for (String productId : failMap.keySet()) {
-//            double percent =
-//                    (double) failMap.get(productId) / (failMap.get(productId) + successMap.getOrDefault(productId, 0L))
-//                            * 100;
-//            if (percent >= request.getPercent()) {
-//                failList.add(FailOrderResponse.builder().productId(productId).percent(percent).build());
-//            }
-//        }
-//        return failList;
-//    }
-//
-//    private void initMap(FailCancelOrderRequest request, Map<String, Long> successMap, Map<String, Long> failMap) {
-//        List<CancelOrder> orders = cancelOrderRepository.findByCancelOrderTimeBetween(request.getStartTime(),
-//                request.getEndTime());
-//        for (CancelOrder order : orders) {
-//            if (order.isSuccess()) {
-//                successMap.merge(order.getProductId(), 1L, Long::sum);
-//            }
-//            if (!order.isSuccess()) {
-//                failMap.merge(order.getProductId(), 1L, Long::sum);
-//            }
-//        }
-//    }
 
     public void addOrderRecord(CancelOrderRequest request) {
         cancelOrderRepository.save(
@@ -122,6 +102,46 @@ public class CancelOrderService {
                         .account(request.getAccount())
                         .build()
         );
+    }
+
+    public List<CancelPercentResponse> getCancelPercent(CancelPercentRequest request) {
+        Map<String, Long> orderMap = initOrderMap(request);
+        Map<String, Long> cancelMap = initCancelOrderMap(request);
+        List<CancelPercentResponse> cancelOrderList = new ArrayList<>();
+        for (String productId : cancelMap.keySet()) {
+            double percent =
+                    (double) cancelMap.get(productId) / orderMap.getOrDefault(productId, cancelMap.get(productId))
+                            * 100;
+            if (percent >= request.getPercent()) {
+                cancelOrderList.add(CancelPercentResponse.builder().productId(productId).percent(percent).build());
+            }
+        }
+        return cancelOrderList;
+
+    }
+
+    private Map<String, Long> initCancelOrderMap(CancelPercentRequest request) {
+        Map<String, Long> cancelMap = new HashMap<>();
+        List<CancelOrder> cancelOrderList = cancelOrderRepository.findByCancelOrderTimeBetween(
+                request.getStartTime(), request.getEndTime());
+        for (CancelOrder cancelOrder : cancelOrderList) {
+            if (cancelOrder.isSuccess()) {
+                cancelMap.merge(cancelOrder.getProductId(), 1L, Long::sum);
+            }
+        }
+        return cancelMap;
+    }
+
+    private Map<String, Long> initOrderMap(CancelPercentRequest request) {
+        Map<String, Long> orderMap = new HashMap<>();
+        List<Order> OrderList = orderRepository
+                .findByOrderTimeBetween(request.getStartTime(), request.getEndTime());
+        for (Order order : OrderList) {
+            if (order.isSuccess()) {
+                orderMap.merge(order.getProductId(), 1L, Long::sum);
+            }
+        }
+        return orderMap;
     }
 
 //    public List<OrderResponse> searchByName(OrderSearchRequest request) {

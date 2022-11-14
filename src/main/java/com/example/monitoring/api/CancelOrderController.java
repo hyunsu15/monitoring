@@ -3,10 +3,13 @@ package com.example.monitoring.api;
 import static com.example.monitoring.common.util.Validator.checkError;
 
 import com.example.monitoring.cancelOrder.dto.CancelOrderRequest;
+import com.example.monitoring.cancelOrder.dto.CancelPercentRequest;
+import com.example.monitoring.cancelOrder.dto.CancelPercentResponse;
 import com.example.monitoring.cancelOrder.dto.MustGradeRequest;
 import com.example.monitoring.cancelOrder.service.CancelOrderService;
 import com.example.monitoring.common.exception.IllegalDateException;
 import com.example.monitoring.common.exception.NoMisMatchGradeException;
+import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,12 +47,12 @@ public class CancelOrderController {
         return ResponseEntity.ok().body(cancelOrderService.countGradeMoreThan(request));
     }
 
-//    @GetMapping("/percent")
-//    public ResponseEntity<List<FailOrderResponse>> getFailOrderResponse(@Valid FailOrderRequest request,
-//                                                                        BindingResult result) {
-//        checkError(result, () -> new IllegalDateException());
-//        return ResponseEntity.ok().body(cancelOrderService.getFailOrders(request));
-//    }
+    @GetMapping("/percent")
+    public ResponseEntity<List<CancelPercentResponse>> getFailOrderResponse(@Valid CancelPercentRequest request,
+                                                                            BindingResult result) {
+        checkError(result, () -> new IllegalDateException());
+        return ResponseEntity.ok().body(cancelOrderService.getCancelPercent(request));
+    }
 
     @PostMapping()
     public ResponseEntity<Void> addCancelOrderRecord(@Valid @RequestBody CancelOrderRequest request,
