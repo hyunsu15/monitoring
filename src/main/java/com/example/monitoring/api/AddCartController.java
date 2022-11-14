@@ -5,8 +5,8 @@ import static com.example.monitoring.common.util.Validator.checkError;
 import com.example.monitoring.addCart.dto.AddCartRequest;
 import com.example.monitoring.addCart.dto.FailAddCartRequest;
 import com.example.monitoring.addCart.dto.FailAddCartResponse;
-import com.example.monitoring.addCart.exception.NoMisMatchPercentException;
 import com.example.monitoring.addCart.service.AddCartService;
+import com.example.monitoring.common.exception.IllegalDateException;
 import com.example.monitoring.common.exception.NoMisMatchGradeException;
 import com.example.monitoring.showProduct.dto.MustGradeRequest;
 import java.util.List;
@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,7 +30,8 @@ public class AddCartController {
     private final AddCartService addCartService;
 
     @GetMapping()
-    public ResponseEntity<Long> getCountWish(@Valid AddCartRequest request) {
+    public ResponseEntity<Long> getCountWish(@Valid AddCartRequest request, BindingResult result) {
+        checkError(result, () -> new IllegalDateException());
         return ResponseEntity.ok().body(addCartService.getCountWish(request));
     }
 
@@ -47,9 +50,16 @@ public class AddCartController {
     @GetMapping("/fail")
     public ResponseEntity<List<FailAddCartResponse>> getFailCartResponse(@Valid FailAddCartRequest request,
                                                                          BindingResult result) {
-        checkError(result, () -> new NoMisMatchPercentException());
+        checkError(result, () -> new IllegalDateException());
         return ResponseEntity.ok().body(addCartService.getFailAddCarts(request));
     }
 
+    @PostMapping()
+    public ResponseEntity<Void> addAddCartRecord(@Valid @RequestBody AddCartRequest request,
+                                                 BindingResult result) {
+        checkError(result, () -> new IllegalDateException());
+        addCartService.addAddCartRecord(request);
+        return ResponseEntity.ok().build();
+    }
 
 }

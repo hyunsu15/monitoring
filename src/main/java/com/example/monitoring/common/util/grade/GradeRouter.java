@@ -10,17 +10,16 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class GradeRouter {
     private final List<Grade> grades;
-    private final BronzeGrade defaultGrade;
 
-    public Grade findByGradeElseGetBronze(String grade) {
+    public Grade findByGradeElseThrow(String grade) {
         return grades.stream()
                 .filter(x -> x.isSame(grade))
                 .findAny()
                 .orElseThrow(() -> new NoMisMatchGradeException());
     }
 
-    public List<Grade> findByGradeListElseGetBronze(String grade) {
-        int value = findByGradeElseGetBronze(grade).getGradeValue();
+    public List<Grade> findByGradeListElseThrow(String grade) {
+        int value = findByGradeElseThrow(grade).getGradeValue();
         return grades.stream()
                 .filter(x -> x.getGradeValue() >= value)
                 .collect(Collectors.toList());

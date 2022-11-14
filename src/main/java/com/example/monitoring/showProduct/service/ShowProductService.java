@@ -52,7 +52,7 @@ public class ShowProductService {
     }
 
     public Long countGradeEquals(MustGradeRequest request) {
-        Grade grade = gradeRouter.findByGradeElseGetBronze(request.getGrade());
+        Grade grade = gradeRouter.findByGradeElseThrow(request.getGrade());
         long count = getCount(
                 request
                 , () -> showProductRepository.findByShowTimeBetweenAndGrade(
@@ -68,7 +68,7 @@ public class ShowProductService {
     }
 
     public Long countGradeMoreThan(MustGradeRequest request) {
-        List<Grade> grades = gradeRouter.findByGradeListElseGetBronze(request.getGrade());
+        List<Grade> grades = gradeRouter.findByGradeListElseThrow(request.getGrade());
         long count = 0;
         for (Grade grade : grades) {
             count += getCount(

@@ -56,7 +56,7 @@ public class AddCartService {
 
 
     public Long countGradeEquals(MustGradeRequest request) {
-        Grade grade = gradeRouter.findByGradeElseGetBronze(request.getGrade());
+        Grade grade = gradeRouter.findByGradeElseThrow(request.getGrade());
         long count = getCount(
                 request
                 , () -> addCartRepository.findByAddTimeBetweenAndGrade(
@@ -72,7 +72,7 @@ public class AddCartService {
     }
 
     public Long countGradeMoreThan(MustGradeRequest request) {
-        List<Grade> grades = gradeRouter.findByGradeListElseGetBronze(request.getGrade());
+        List<Grade> grades = gradeRouter.findByGradeListElseThrow(request.getGrade());
         long count = 0;
         for (Grade grade : grades) {
             count += getCount(
@@ -116,5 +116,16 @@ public class AddCartService {
                 failMap.merge(addCart.getProductId(), 1L, Long::sum);
             }
         }
+    }
+
+    public void addAddCartRecord(AddCartRequest request) {
+        addCartRepository.save(
+                AddCart.builder()
+                        .grade(request.getGrade())
+                        .productId(request.getProductId())
+                        .success(request.isSuccess())
+                        .account(request.getAccount())
+                        .build()
+        );
     }
 }
